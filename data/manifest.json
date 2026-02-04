@@ -1,0 +1,42 @@
+{
+  "downloaded_at": "2026-02-03T20:59:45.248775+00:00",
+  "datasets": [
+    {
+      "name": "wikitext",
+      "status": "skipped",
+      "reason": "exists"
+    },
+    {
+      "name": "tinystories",
+      "status": "skipped",
+      "reason": "exists"
+    },
+    {
+      "name": "codeparrot",
+      "status": "skipped",
+      "reason": "exists"
+    },
+    {
+      "name": "arxiv_abstracts",
+      "status": "skipped",
+      "reason": "exists"
+    },
+    {
+      "name": "ml_arxiv",
+      "status": "skipped",
+      "reason": "exists"
+    },
+    {
+      "name": "openbible",
+      "status": "skipped",
+      "reason": "exists"
+    },
+    {
+      "name": "stanford_plato",
+      "status": "success",
+      "samples": 1000,
+      "file": "data\\philosophy\\stanford_plato.jsonl",
+      "size_bytes": 32052822
+    }
+  ]
+}
