@@ -6,7 +6,21 @@
       "mcp__plugin_dude_dude__upsert_record",
       "Bash(pip install:*)",
       "Bash(python:*)",
-      "Bash(nvidia-smi:*)"
+      "Bash(nvidia-smi:*)",
+      "mcp__plugin_dude_dude__list_projects",
+      "Bash(grep:*)",
+      "Bash(where:*)",
+      "Bash(cmd.exe //C \"cd /D C:\\\\dev\\\\fingerskier\\\\agent\\\\nano_think && python -c \"\"import torch; print\\(f''torch {torch.__version__}''\\); print\\(f''CUDA available: {torch.cuda.is_available\\(\\)}''\\)\"\"\")",
+      "Bash(cmd.exe /C \"cd /D C:\\\\dev\\\\fingerskier\\\\agent\\\\nano_think && python gpu_verify.py\")",
+      "Bash(MSYS_NO_PATHCONV=1 cmd.exe //C \"python C:\\\\dev\\\\fingerskier\\\\agent\\\\nano_think\\\\gpu_verify.py\")",
+      "Bash(MSYS_NO_PATHCONV=1 cmd.exe:*)",
+      "Bash(powershell.exe -Command \"cd C:\\\\dev\\\\fingerskier\\\\agent\\\\nano_think; python gpu_verify.py\")",
+      "Bash(powershell.exe -Command \"pip show torch\")",
+      "Bash(powershell.exe -Command \"Get-ChildItem ''C:\\\\Users\\\\finge\\\\AppData\\\\Roaming\\\\Python\\\\Python313\\\\site-packages'' -Directory | Where-Object { $_Name -like ''*orch*'' -or $_Name -like ''*torch*'' } | Select-Object Name, LastWriteTime\")",
+      "Bash(ls:*)",
+      "Bash(pip:*)",
+      "Bash(conda env list:*)",
+      "Bash(source:*)"
     ]
   }
 }
