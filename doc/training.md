@@ -103,6 +103,56 @@ This loads the three expert checkpoints, freezes them, and trains the token embe
 
 Checkpoint is saved to `checkpoints/nanothink_mla.pt`.
 
+## Resuming from a Checkpoint
+
+If training is interrupted (crash, timeout, manual stop), you can resume from the last saved checkpoint using the `--resume` flag.
+
+### Usage
+
+```bash
+# Resume expert pre-training
+python scripts/pretrain_experts.py --expert transformer --resume checkpoints/transformer_expert.pt
+
+# Resume MLA training
+python scripts/train_mla.py --resume checkpoints/nanothink_mla.pt
+```
+
+### What's Saved in a Checkpoint
+
+| Field            | Description                                      |
+|------------------|--------------------------------------------------|
+| `model_state`    | Full model weights (`state_dict`)                |
+| `optimizer_state` | Optimizer momentum / adaptive-rate buffers       |
+| `step`           | Global training step (used for LR schedule)      |
+| `epoch`          | Epoch number at save time                        |
+| `amp_scaler`     | AMP `GradScaler` state (only when AMP is active) |
+
+### What Happens on Resume
+
+1. The checkpoint is loaded with `strict=False`, so minor architecture changes (added/removed parameters) won't cause a hard failure — mismatched keys are silently skipped.
+2. The optimizer state is restored, preserving momentum and adaptive learning-rate buffers.
+3. Training restarts at **epoch + 1** with the saved step counter, so the cosine LR schedule picks up where it left off.
+
+### Checkpoint Locations
+
+| File                                    | When Created                          |
+|-----------------------------------------|---------------------------------------|
+| `checkpoints/<expert>_expert.pt`        | Best validation loss during Phase 1   |
+| `checkpoints/nanothink_mla.pt`         | Best validation loss during Phase 2   |
+| `checkpoints/<expert>_expert_epoch{N}.pt` | Every 5 epochs (periodic snapshot) |
+| `checkpoints/nanothink_mla_epoch{N}.pt`  | Every 5 epochs (periodic snapshot) |
+
+To resume from a periodic snapshot instead of the best checkpoint, pass the epoch-specific path:
+
+```bash
+python scripts/pretrain_experts.py --expert transformer --resume checkpoints/transformer_expert_epoch10.pt
+```
+
+### Caveats
+
+- **LR schedule recalculation:** The cosine schedule is recomputed from the restored `step` value. This works correctly for a straightforward resume. However, if you change `max_epochs` between runs, the cosine curve shifts — the schedule will still start from the correct step, but the total decay length changes.
+- **`strict=False` loading:** Missing or extra keys in the checkpoint are silently ignored. This is intentional (it allows minor model changes between runs) but means a completely wrong checkpoint won't raise an error — it will just produce garbage. Double-check the checkpoint path matches the model you're training.
+
 ## CLI Reference
 
 ### `scripts/pretrain_experts.py`
