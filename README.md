@@ -44,7 +44,7 @@ AI modelling for quick, local tasks
 
 ## Sleep
 
-* Pruning
+* Grafting
   * vectors are randomly sampled
   * search for highly similar vectors
   * create a new vectors by fusing the highly similar vectors
