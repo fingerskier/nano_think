@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nano_think"
+version = "0.1.0"
+description = "MoE language model with MLA routing — Transformer, Diffuser, and State-Space experts"
+requires-python = ">=3.10"
+dependencies = [
+    "torch>=2.2",
+    "transformers>=4.36",
+    "einops>=0.7",
+    "faiss-cpu>=1.7",
+]
+
+[project.optional-dependencies]
+gpu = ["faiss-gpu>=1.7"]
+logging = ["wandb"]
+dev = ["pytest", "pytest-cov"]
+
+[tool.setuptools.packages.find]
+include = ["nano_think*"]
