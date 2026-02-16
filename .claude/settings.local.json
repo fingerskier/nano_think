@@ -3,7 +3,10 @@
     "allow": [
       "Bash(wc:*)",
       "mcp__plugin_dude_dude__list_records",
-      "mcp__plugin_dude_dude__upsert_record"
+      "mcp__plugin_dude_dude__upsert_record",
+      "Bash(pip install:*)",
+      "Bash(python:*)",
+      "Bash(nvidia-smi:*)"
     ]
   }
 }

@@ -44,3 +44,5 @@ runs/
 # Vector store
 *.faiss
 *.index
+
+.claude/
