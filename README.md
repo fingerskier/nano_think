@@ -3,6 +3,8 @@ AI modelling for quick, local tasks
 
 ## Architecture
 
+* Encoder
+* Decoder
 * Multi-Head Latent attention
 * Expert models
   * Transformer
@@ -19,17 +21,17 @@ AI modelling for quick, local tasks
 ## Functionality
 
 0. Input
-1. Add a few stored vectors to the context
-2. Encode & attend
-3. Generate output from each module
+1. Encode
+2. Add a few stored vectors to the context
+3. Encode & attend
+4. Generate output from each module
    * Transformer
    * Diffuser
    * State-Space
-4. Combine expert outputs via weighted sum
-5. Store the vector
-6. Decode and output
+5. Combine expert outputs via weighted sum
+6. Store the vector
+7. Decode and output
 
-* Use the Transformer for encode/decode tasks
 * Everything is 384D
 
 

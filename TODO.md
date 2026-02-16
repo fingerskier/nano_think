@@ -10,3 +10,4 @@
    d. Combine
    e. Decode
 4. Train the overall model (not the experts)
+   * 
