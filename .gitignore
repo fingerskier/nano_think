@@ -1,8 +1,46 @@
+# Python
 __pycache__/
 *.py[cod]
+*.pyo
+venv/
+.venv/
+env/
+
+# Distribution / packaging
 *.egg-info/
 dist/
 build/
-*.egg
 .eggs/
-checkpoints/*.pt
+*.egg
+*.whl
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.project
+.settings/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ML / Training artifacts
+checkpoints/
+wandb/
+runs/
+*.onnx
+*.safetensors
+
+# Environment / secrets
+.env
+.env.*
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Vector store
+*.faiss
+*.index
