@@ -40,3 +40,17 @@ AI modelling for quick, local tasks
 * Pre-train the state-space model on `./data`
 
 * Then do the whole graph to train just the MLA
+
+
+## Sleep
+
+* Pruning
+  * vectors are randomly sampled
+  * search for highly similar vectors
+  * create a new vectors by fusing the highly similar vectors
+  * discard the original vectors
+* Dreaming
+  * vectors are randomly sampled
+  * search for dissimilar vectors
+  * create a new vector from the fusion of those vectors
+  * retain the sampled vectors
