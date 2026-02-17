@@ -52,6 +52,7 @@ class Tokenizer:
             from transformers import AutoTokenizer
 
             self._hf = AutoTokenizer.from_pretrained(name)
+            self._hf.model_max_length = max_len
             if self._hf.pad_token is None:
                 self._hf.pad_token = self._hf.eos_token
         except Exception:

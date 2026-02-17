@@ -29,6 +29,7 @@ desktop.ini
 
 # ML / Training artifacts
 checkpoints/
+data_prepared/
 wandb/
 runs/
 *.onnx
