@@ -130,10 +130,39 @@ def mla_loss_fn(model, batch, device, amp_dtype, entropy_reg: float = 0.01):
 def main():
     parser = argparse.ArgumentParser(description="Train MLA pipeline with frozen experts")
     parser.add_argument("--data_dir", type=str, default="data")
-    parser.add_argument("--resume", type=str, default=None)
+    parser.add_argument("--resume", nargs="?", const="auto", default=None,
+                        help="Resume from checkpoint path (omit path to auto-detect)")
     parser.add_argument("--device", type=str, default=None)
     parser.add_argument("--use_vector_store", action="store_true", default=False)
     args = parser.parse_args()
+
+    # Auto-detect checkpoint when --resume is used without a path
+    if args.resume == "auto":
+        import glob
+        ckpt_dir = TrainMLAConfig().checkpoint_dir
+        name = "nanothink_mla"
+        candidates = []
+
+        # Priority 1: interrupted checkpoint
+        interrupted = os.path.join(ckpt_dir, f"{name}_interrupted.pt")
+        if os.path.exists(interrupted):
+            candidates.append(interrupted)
+
+        # Priority 2: newest epoch checkpoint
+        epoch_pattern = os.path.join(ckpt_dir, f"{name}_epoch*.pt")
+        epoch_files = sorted(glob.glob(epoch_pattern), key=os.path.getmtime, reverse=True)
+        candidates.extend(epoch_files)
+
+        # Priority 3: best checkpoint
+        best = os.path.join(ckpt_dir, f"{name}.pt")
+        if os.path.exists(best):
+            candidates.append(best)
+
+        if candidates:
+            args.resume = candidates[0]
+            print(f"Auto-detected checkpoint: {args.resume}")
+        else:
+            parser.error(f"--resume: no checkpoints found in {ckpt_dir}/")
 
     # If user didn't explicitly set --data_dir, prefer data_prepared/ if it exists
     if args.data_dir == "data" and os.path.isdir("data_prepared"):
@@ -284,7 +313,7 @@ def main():
         interrupt_path = str(ckpt_dir / "nanothink_mla_interrupted.pt")
         save_checkpoint(model, optimizer, step, epoch, best_val_loss, interrupt_path, scaler)
         print(f"Checkpoint saved to {interrupt_path}")
-        print(f"Resume with: python scripts/train_mla.py --resume {interrupt_path}")
+        print(f"Resume with: python scripts/train_mla.py --resume")
 
     print(f"\nMLA training complete. Best val loss: {best_val_loss:.4f}")
     print(f"Checkpoint: {ckpt_dir / 'nanothink_mla.pt'}")

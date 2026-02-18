@@ -110,12 +110,20 @@ If training is interrupted (crash, timeout, manual stop), you can resume from th
 ### Usage
 
 ```bash
-# Resume expert pre-training
-python scripts/pretrain_experts.py --expert transformer --resume checkpoints/transformer_expert.pt
+# Auto-detect most recent checkpoint
+python scripts/pretrain_experts.py --expert transformer --resume
+python scripts/train_mla.py --resume
 
-# Resume MLA training
+# Explicit checkpoint path
+python scripts/pretrain_experts.py --expert transformer --resume checkpoints/transformer_expert.pt
 python scripts/train_mla.py --resume checkpoints/nanothink_mla.pt
 ```
+
+When `--resume` is used without a path, auto-detection searches `checkpoints/` in this priority order:
+
+1. `*_interrupted.pt` — most likely what you want after Ctrl+C
+2. Newest `*_epoch*.pt` — latest periodic snapshot
+3. `*.pt` (best checkpoint) — may be older than the epoch snapshots
 
 ### What's Saved in a Checkpoint
 
@@ -161,7 +169,7 @@ python scripts/pretrain_experts.py --expert transformer --resume checkpoints/tra
 |--------------|----------|------------------------------------------------|
 | `--expert`   | required | Expert to train: `transformer`, `diffuser`, `state_space` |
 | `--data_dir` | `data`   | Root data directory                            |
-| `--resume`   | `None`   | Path to checkpoint to resume from              |
+| `--resume`   | `None`   | Resume from checkpoint (omit path to auto-detect) |
 | `--device`   | auto     | Device (`cuda`, `cpu`, or specific like `cuda:0`) |
 
 ### `scripts/train_mla.py`
@@ -169,7 +177,7 @@ python scripts/pretrain_experts.py --expert transformer --resume checkpoints/tra
 | Flag                 | Default  | Description                                   |
 |----------------------|----------|-----------------------------------------------|
 | `--data_dir`         | `data`   | Root data directory                           |
-| `--resume`           | `None`   | Path to checkpoint to resume from             |
+| `--resume`           | `None`   | Resume from checkpoint (omit path to auto-detect) |
 | `--device`           | auto     | Device (`cuda`, `cpu`, or specific)           |
 | `--use_vector_store` | `False`  | Enable FAISS vector store                     |
 
