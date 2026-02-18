@@ -135,6 +135,13 @@ def main():
     parser.add_argument("--use_vector_store", action="store_true", default=False)
     args = parser.parse_args()
 
+    # If user didn't explicitly set --data_dir, prefer data_prepared/ if it exists
+    if args.data_dir == "data" and os.path.isdir("data_prepared"):
+        print("Found data_prepared/ — using pre-chunked data")
+        args.data_dir = "data_prepared"
+    elif args.data_dir == "data":
+        print("Warning: data_prepared/ not found. Run `python scripts/premunge.py` first to avoid truncation waste.")
+
     if args.device:
         device = torch.device(args.device)
     elif torch.cuda.is_available():
