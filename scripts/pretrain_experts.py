@@ -262,47 +262,54 @@ def main():
     print(f"Pre-training {args.expert} expert")
     print(f"{'='*60}\n")
 
-    for epoch in range(start_epoch, train_cfg.max_epochs):
-        train_loss, step = train_epoch(
-            model=model,
-            dataloader=train_loader,
-            optimizer=optimizer,
-            scheduler_fn=lr_fn,
-            step=step,
-            epoch=epoch,
-            device=device,
-            grad_clip=train_cfg.grad_clip,
-            log_interval=train_cfg.log_interval,
-            scaler=scaler,
-            amp_dtype=amp_dtype,
-            use_amp=train_cfg.use_amp and device.type == "cuda",
-            compute_loss_fn=loss_fn,
-        )
+    try:
+        for epoch in range(start_epoch, train_cfg.max_epochs):
+            train_loss, step = train_epoch(
+                model=model,
+                dataloader=train_loader,
+                optimizer=optimizer,
+                scheduler_fn=lr_fn,
+                step=step,
+                epoch=epoch,
+                device=device,
+                grad_clip=train_cfg.grad_clip,
+                log_interval=train_cfg.log_interval,
+                scaler=scaler,
+                amp_dtype=amp_dtype,
+                use_amp=train_cfg.use_amp and device.type == "cuda",
+                compute_loss_fn=loss_fn,
+            )
 
-        val_loss = evaluate(model, val_loader, device, amp_dtype=amp_dtype, compute_loss_fn=loss_fn)
-        val_ppl = math.exp(val_loss) if val_loss < 100 else float("inf")
+            val_loss = evaluate(model, val_loader, device, amp_dtype=amp_dtype, compute_loss_fn=loss_fn)
+            val_ppl = math.exp(val_loss) if val_loss < 100 else float("inf")
 
-        print(f"\nEpoch {epoch} complete | train_loss {train_loss:.4f} | val_loss {val_loss:.4f} | val_ppl {val_ppl:.2f}")
+            print(f"\nEpoch {epoch} complete | train_loss {train_loss:.4f} | val_loss {val_loss:.4f} | val_ppl {val_ppl:.2f}")
 
-        # Save checkpoint
-        ckpt_path = str(ckpt_dir / f"{args.expert}_expert.pt")
-        if val_loss < best_val_loss:
-            best_val_loss = val_loss
-            patience_counter = 0
-            save_checkpoint(model, optimizer, step, epoch, val_loss, ckpt_path, scaler)
-            print(f"  -> Best model saved to {ckpt_path}")
-        else:
-            patience_counter += 1
-            print(f"  -> No improvement ({patience_counter}/{patience})")
+            # Save checkpoint
+            ckpt_path = str(ckpt_dir / f"{args.expert}_expert.pt")
+            if val_loss < best_val_loss:
+                best_val_loss = val_loss
+                patience_counter = 0
+                save_checkpoint(model, optimizer, step, epoch, val_loss, ckpt_path, scaler)
+                print(f"  -> Best model saved to {ckpt_path}")
+            else:
+                patience_counter += 1
+                print(f"  -> No improvement ({patience_counter}/{patience})")
 
-        # Also save periodic checkpoint
-        if (epoch + 1) % 5 == 0:
-            periodic_path = str(ckpt_dir / f"{args.expert}_expert_epoch{epoch}.pt")
-            save_checkpoint(model, optimizer, step, epoch, val_loss, periodic_path, scaler)
+            # Also save periodic checkpoint
+            if (epoch + 1) % 5 == 0:
+                periodic_path = str(ckpt_dir / f"{args.expert}_expert_epoch{epoch}.pt")
+                save_checkpoint(model, optimizer, step, epoch, val_loss, periodic_path, scaler)
 
-        if patience_counter >= patience:
-            print(f"Early stopping at epoch {epoch}")
-            break
+            if patience_counter >= patience:
+                print(f"Early stopping at epoch {epoch}")
+                break
+    except KeyboardInterrupt:
+        print(f"\nInterrupted at epoch {epoch}, step {step}. Saving checkpoint...")
+        interrupt_path = str(ckpt_dir / f"{args.expert}_expert_interrupted.pt")
+        save_checkpoint(model, optimizer, step, epoch, best_val_loss, interrupt_path, scaler)
+        print(f"Checkpoint saved to {interrupt_path}")
+        print(f"Resume with: python scripts/pretrain_experts.py --expert {args.expert} --resume {interrupt_path}")
 
     print(f"\nPre-training complete. Best val loss: {best_val_loss:.4f}")
     print(f"Checkpoint: {ckpt_dir / f'{args.expert}_expert.pt'}")
