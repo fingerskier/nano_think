@@ -80,6 +80,7 @@ def train_epoch(
     log_interval: int = 50,
     scaler: GradScaler | None = None,
     amp_dtype: torch.dtype = torch.bfloat16,
+    use_amp: bool = True,
     grad_accum_steps: int = 1,
     compute_loss_fn=None,
 ) -> tuple[float, int]:
@@ -108,7 +109,7 @@ def train_epoch(
         labels = batch["labels"].to(device)
         attention_mask = batch["attention_mask"].to(device)
 
-        with torch.autocast(device_type=device.type, dtype=amp_dtype, enabled=scaler is not None):
+        with torch.autocast(device_type=device.type, dtype=amp_dtype, enabled=use_amp):
             if compute_loss_fn is not None:
                 loss, extra = compute_loss_fn(model, batch, device, amp_dtype)
             else:
@@ -145,7 +146,7 @@ def train_epoch(
 
         if batch_idx % log_interval == 0:
             avg = total_loss / n_batches
-            ppl = math.exp(min(avg, 20))
+            ppl = math.exp(avg) if avg < 100 else float("inf")
             print(
                 f"  epoch {epoch} | step {step} | batch {batch_idx}/{len(dataloader)} | "
                 f"loss {avg:.4f} | ppl {ppl:.2f} | lr {lr:.2e}"

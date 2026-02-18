@@ -208,6 +208,7 @@ def main():
         split="train",
         val_split=train_cfg.val_split,
         domain_balanced=True,
+        num_workers=2,
     )
     val_loader = build_dataloader(
         data_dir=args.data_dir,
@@ -216,6 +217,7 @@ def main():
         split="val",
         val_split=train_cfg.val_split,
         domain_balanced=False,
+        num_workers=2,
     )
     print(f"Train batches: {len(train_loader)} | Val batches: {len(val_loader)}")
 
@@ -273,11 +275,12 @@ def main():
             log_interval=train_cfg.log_interval,
             scaler=scaler,
             amp_dtype=amp_dtype,
+            use_amp=train_cfg.use_amp and device.type == "cuda",
             compute_loss_fn=loss_fn,
         )
 
         val_loss = evaluate(model, val_loader, device, amp_dtype=amp_dtype, compute_loss_fn=loss_fn)
-        val_ppl = math.exp(min(val_loss, 20))
+        val_ppl = math.exp(val_loss) if val_loss < 100 else float("inf")
 
         print(f"\nEpoch {epoch} complete | train_loss {train_loss:.4f} | val_loss {val_loss:.4f} | val_ppl {val_ppl:.2f}")
 

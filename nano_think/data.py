@@ -85,14 +85,20 @@ class TextDataset(Dataset):
         if len(ids) > self.max_seq_len:
             ids = ids[: self.max_seq_len]
 
+        real_len = len(ids)
+
         # Pad
-        pad_len = self.max_seq_len - len(ids)
-        attention_mask = [1] * len(ids) + [0] * pad_len
+        pad_len = self.max_seq_len - real_len
+        attention_mask = [1] * real_len + [0] * pad_len
         ids = ids + [self.tokenizer.pad_id] * pad_len
 
         input_ids = torch.tensor(ids[:-1], dtype=torch.long)
         labels = torch.tensor(ids[1:], dtype=torch.long)
         attention_mask = torch.tensor(attention_mask[:-1], dtype=torch.long)
+
+        # Mask padding positions so cross_entropy ignores them
+        if real_len - 1 < len(labels):
+            labels[real_len - 1:] = -100
 
         return {
             "input_ids": input_ids,
@@ -152,4 +158,5 @@ def build_dataloader(
         num_workers=num_workers,
         pin_memory=True,
         drop_last=(split == "train"),
+        persistent_workers=(num_workers > 0),
     )
