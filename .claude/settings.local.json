@@ -20,7 +20,11 @@
       "Bash(ls:*)",
       "Bash(pip:*)",
       "Bash(conda env list:*)",
-      "Bash(source:*)"
+      "Bash(source:*)",
+      "Bash(python3:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(npx -y @anthropic-ai/claude-code --help)"
     ]
   }
 }

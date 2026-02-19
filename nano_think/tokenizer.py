@@ -1,8 +1,8 @@
 """Tokenizer for nano_think.
 
 Supports two backends:
-  1. HuggingFace transformers (if a pre-trained tokenizer is available/downloadable)
-  2. Byte-level fallback (256 byte tokens + special tokens, no network required)
+  1. HuggingFace transformers (default, e.g. "gpt2")
+  2. Byte-level (explicit opt-in via name="bytes", no network required)
 """
 
 from __future__ import annotations
@@ -41,26 +41,28 @@ class _ByteTokenizer:
 
 
 class Tokenizer:
-    """Tokenizer wrapper that uses HuggingFace when possible, byte-level otherwise."""
+    """Tokenizer wrapper: HuggingFace by default, byte-level via name='bytes'."""
 
     def __init__(self, name: str = "gpt2", max_len: int = 512):
         self.max_len = max_len
         self._hf = None
+        self._byte = None
 
-        # Try HuggingFace first
-        try:
-            from transformers import AutoTokenizer
-
-            self._hf = AutoTokenizer.from_pretrained(name)
-            if self._hf.pad_token is None:
-                self._hf.pad_token = self._hf.eos_token
-        except Exception:
-            self._hf = None
-
-        if self._hf is None:
+        if name == "bytes":
             self._byte = _ByteTokenizer()
-        else:
-            self._byte = None
+            return
+
+        from transformers import AutoTokenizer
+
+        # Try cache first (no network, no warning)
+        try:
+            self._hf = AutoTokenizer.from_pretrained(name, local_files_only=True)
+        except Exception:
+            # Not cached yet — download once
+            self._hf = AutoTokenizer.from_pretrained(name)
+
+        if self._hf.pad_token is None:
+            self._hf.pad_token = self._hf.eos_token
 
     # ---- properties ----------------------------------------------------------
 
